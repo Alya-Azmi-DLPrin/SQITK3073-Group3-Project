@@ -2,7 +2,7 @@
 Students:
 
 * Alya Farhana
-* Lim ZhiYee
-* Jing HanKoo
-* Lim XunYi
-* Yap HuiShin
+* Lim Zhi Yee
+* Jing Han Koo
+* Lim Xun Yi
+* Yap Hui Shin
