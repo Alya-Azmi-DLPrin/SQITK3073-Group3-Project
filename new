@@ -1,0 +1,144 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+from fpdf import FPDF
+from datetime import datetime
+import base64
+import os
+
+# Optional: If you want image export support
+try:
+    import kaleido
+except ImportError:
+    kaleido = None
+
+# -------------------- Data Loading --------------------
+@st.cache_data
+def load_data():
+    URL_DATA = 'https://storage.dosm.gov.my/cpi/cpi_2d_state_inflation.parquet'
+    df = pd.read_parquet(URL_DATA)
+    df['date'] = pd.to_datetime(df['date'])
+
+    # Calculate YoY inflation
+    df['price_index'] = (1 + df['inflation_mom']/100).cumprod()
+    df['inflation_yoy'] = df.groupby(['state', 'division'])['price_index'].pct_change(periods=12) * 100
+    return df.drop('price_index', axis=1)
+
+# -------------------- Division Mapping --------------------
+division_mapping = {
+    '01': 'Food & Beverages',
+    '02': 'Alcoholic Beverages & Tobacco',
+    '03': 'Clothing & Footwear',
+    '04': 'Housing, Utilities, Gas & Other Fuels',
+    '05': 'Household Furnishings, Equipment & Maintenance',
+    '06': 'Health',
+    '07': 'Transport',
+    '08': 'Information & Communication',
+    '09': 'Recreation, Sport & Culture',
+    '10': 'Education',
+    '11': 'Restaurant & Accommodation Services',
+    '12': 'Insurance & Financial Services',
+    '13': 'Personal Care, Social Protection & Miscellaneous Goods and Services'
+}
+
+core_divisions = ['03', '05', '06', '08', '09', '10', '12']
+
+# -------------------- Main App --------------------
+def main():
+    st.set_page_config(layout="wide", page_title="Malaysia Inflation Combined Dashboard")
+    df = load_data()
+
+    df['division_name'] = df['division'].map(division_mapping).astype(str).str.strip().fillna('Unknown')
+
+    page = st.sidebar.radio("📄 Select Page", [
+        "📊 Data View",
+        "🔮 Forecast",
+        "🌡️ FDI Heatmap",
+        "📊 State Analysis",
+        "📈 National Trends"
+    ])
+
+    # ========== PAGE: Data View ==========
+    if page == "📊 Data View":
+        st.title("📊 Inflation Rate Dashboard - Data View")
+        division_names = df['division_name'].dropna().unique()
+        selected_division_name = st.sidebar.selectbox("Select Division", sorted(division_names))
+        selected_division_code = [k for k, v in division_mapping.items() if v == selected_division_name][0]
+
+        states = df[df['division'] == selected_division_code]['state'].unique()
+        selected_state = st.sidebar.selectbox("Select State", sorted(states))
+
+        state_df = df[(df['division'] == selected_division_code) & (df['state'] == selected_state)].copy().sort_values('date')
+        min_date, max_date = state_df['date'].min(), state_df['date'].max()
+
+        start_date, end_date = st.sidebar.date_input("Select Date Range", value=(min_date, max_date), min_value=min_date, max_value=max_date)
+        filtered_df = state_df[(state_df['date'] >= pd.to_datetime(start_date)) & (state_df['date'] <= pd.to_datetime(end_date))]
+
+        if not filtered_df.empty:
+            latest_row = filtered_df.iloc[-1]
+            st.subheader(f"Latest Inflation Data for {selected_state} - {selected_division_name}")
+            st.write(f"**Date:** {latest_row['date'].strftime('%Y-%m-%d')}")
+            st.write(f"**MoM Inflation:** {latest_row['inflation_mom']:.4f}%")
+
+            dynamic_chart_df = filtered_df[['date', 'inflation_mom']].set_index('date')
+            st.subheader("📈 Interactive Inflation Trend")
+            st.line_chart(dynamic_chart_df)
+
+            st.subheader("📊 Summary Statistics")
+            stats = filtered_df['inflation_mom'].describe().to_frame().T
+            stats.index = [f"{selected_state} - {selected_division_name}"]
+            st.dataframe(stats.style.format("{:.4f}"))
+        else:
+            st.warning("No data available for the selected range.")
+
+    # ========== PAGE: Forecast ==========
+    elif page == "🔮 Forecast":
+        st.title("🔮 Inflation Forecast - Next 6 Months")
+        division_names = df['division_name'].dropna().unique()
+        selected_division_name = st.sidebar.selectbox("Select Division", sorted(division_names), key="forecast_div")
+        selected_division_code = [k for k, v in division_mapping.items() if v == selected_division_name][0]
+
+        states = df[df['division'] == selected_division_code]['state'].unique()
+        selected_state = st.sidebar.selectbox("Select State", sorted(states), key="forecast_state")
+
+        state_df = df[(df['division'] == selected_division_code) & (df['state'] == selected_state)].copy().sort_values('date')
+
+        if len(state_df) >= 6:
+            state_df['t'] = np.arange(len(state_df))
+            X, y = state_df['t'].values, state_df['inflation_mom'].values
+            a, b = np.polyfit(X, y, deg=1)
+
+            future_t = np.arange(len(X), len(X) + 6)
+            future_pred = a * future_t + b
+            last_date = state_df['date'].iloc[-1]
+            future_dates = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=6, freq='MS')
+
+            forecast_df = pd.DataFrame({'date': future_dates, 'inflation_mom': future_pred})
+            combined_df = pd.concat([state_df[['date', 'inflation_mom']], forecast_df]).set_index('date')
+
+            st.subheader("📈 Forecast + Historical Trend")
+            st.line_chart(combined_df)
+
+            st.subheader("📅 Forecast Table (Next 6 Months)")
+            forecast_display = pd.DataFrame({'Date': future_dates.strftime('%Y-%m'), 'Predicted Inflation MoM (%)': future_pred})
+            st.dataframe(forecast_display.style.format({"Predicted Inflation MoM (%)": "{:.4f}"}))
+        else:
+            st.warning("Not enough data to generate forecast.")
+
+    # ========== PAGE: FDI Heatmap, State Analysis, National Trends ==========
+    else:
+        from heatmap_forecast_analysis import (
+    render_heatmap_page,
+    render_state_analysis_page,
+    render_national_trends_page)
+
+        if page == "🌡️ FDI Heatmap":
+            render_heatmap_page(df, core_divisions, division_mapping)
+        elif page == "📊 State Analysis":
+            render_state_analysis_page(df)
+        elif page == "📈 National Trends":
+            render_national_trends_page(df, core_divisions)
+
+if __name__ == "__main__":
+    main()
