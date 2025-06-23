@@ -3,6 +3,6 @@ Students:
 
 * Alya Farhana
 * Lim Zhi Yee
-* Jing Han Koo
+* Koo Jing Han
 * Lim Xun Yi
 * Yap Hui Shin
