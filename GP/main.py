@@ -6,7 +6,8 @@ from heatmap_page import render_heatmap_page
 from national_trends_page import render_national_trends_page
 from data_view_forecast_page import render_data_view_forecast_page
 
-@st.cache_data
+@st.cache_data (ttl=86400)
+
 def fetch_cpi_data():
     try:
         url = "https://storage.dosm.gov.my/cpi/cpi_2d_state_inflation.csv"
