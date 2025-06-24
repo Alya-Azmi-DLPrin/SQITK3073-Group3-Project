@@ -6,3 +6,6 @@ Students:
 * Koo Jing Han
 * Lim Xun Yi
 * Yap Hui Shin
+
+After downloading the zip file, unzip the file.
+CLick on autorun to launch the program.
