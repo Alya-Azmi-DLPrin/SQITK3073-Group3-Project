@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
-@st.cache_data
+@st.cache_data (ttl=86400)
+
 def load_data():
     url = "https://storage.dosm.gov.my/cpi/cpi_2d_state_inflation.csv"
     df = pd.read_csv(url)
