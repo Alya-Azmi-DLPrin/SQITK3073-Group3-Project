@@ -1,10 +1,8 @@
-# main.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 
 from heatmap_page import render_heatmap_page
-from state_analysis_page import render_state_analysis_page
 from national_trends_page import render_national_trends_page
 from data_view_forecast_page import render_data_view_forecast_page
 
@@ -26,14 +24,14 @@ def fetch_cpi_data():
         df['inflation_yoy'] = pd.to_numeric(df['inflation_yoy'], errors='coerce')
         df['date'] = pd.to_datetime(df['date'])
 
-        st.success("✅ CPI data successfully loaded from API.")
-        st.write(f"📦 {len(df)} rows loaded from API.")
+        st.success("✅ CPI data successfully loaded.")
         return df
 
     except Exception as e:
         st.error(f"❌ Failed to fetch CPI data. Error: {e}")
         return pd.DataFrame()
 
+# Mapping
 division_mapping = {
     '01': 'Food & Beverages',
     '02': 'Alcoholic Beverages & Tobacco',
@@ -49,41 +47,40 @@ division_mapping = {
     '12': 'Insurance & Financial Services',
     '13': 'Personal Care, Social Protection & Miscellaneous Goods and Services'
 }
-
 core_divisions = ['03', '05', '06', '08', '09', '10', '12']
 
+# Config
 st.set_page_config(layout="wide", page_title="Malaysia Cost Intelligence Dashboard")
 
-# Load and process data
+# Load data
 df = fetch_cpi_data()
 
-# Show status in sidebar
+# Show API status
 if not df.empty:
     st.sidebar.info(f"📡 API data: {len(df)} rows loaded")
 else:
     st.sidebar.error("❌ No data loaded from API.")
 
-# Check and add division names
+# Add readable division names
 if 'division' in df.columns:
     df['division_name'] = df['division'].map(division_mapping).astype(str).str.strip().fillna('Unknown')
 else:
     st.error("🛑 Column 'division' missing in dataset.")
     st.stop()
 
-# Sidebar Navigation
+# Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
     "",
     [
         "🏠 Welcome",
         "🧪 Data View & Forecast",
-        "📊 State Analysis",
         "📈 National Trends",
         "🌡️ FDI Heatmap"
     ]
 )
 
-# Page Routing
+# Page routing
 if page == "🏠 Welcome":
     st.markdown("<h1 style='text-align: center;'>🇲🇾 Malaysia Cost Intelligence Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("""
@@ -96,7 +93,6 @@ if page == "🏠 Welcome":
     st.subheader("🔎 Key Features:")
     st.markdown("""
     - 🧪 **Data View & Forecast**  
-    - 📊 **State Analysis**  
     - 📈 **National Trends**  
     - 🌡️ **FDI Heatmap**
     """)
@@ -104,11 +100,7 @@ if page == "🏠 Welcome":
     st.markdown("<div style='text-align: center; font-size: 14px; color: gray;'>Powered by DOSM - Department of Statistics Malaysia</div>", unsafe_allow_html=True)
 
 elif page == "🧪 Data View & Forecast":
-    st.title("Malaysia Cost Intelligence Dashboard")
     render_data_view_forecast_page()
-
-elif page == "📊 State Analysis":
-    render_state_analysis_page(df)
 
 elif page == "📈 National Trends":
     render_national_trends_page(df, core_divisions)
