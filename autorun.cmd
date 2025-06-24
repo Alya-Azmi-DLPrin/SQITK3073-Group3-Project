@@ -1,3 +1,3 @@
 @echo off
-python main.py
+python -m streamlit run main.py
 pause
