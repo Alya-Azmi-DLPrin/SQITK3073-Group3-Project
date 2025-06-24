@@ -1,7 +1,7 @@
-# data_view_forecast_page.py
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.express as px
 
 @st.cache_data
 def load_data():
@@ -44,40 +44,72 @@ def render_data_view_forecast_page():
 
     page = st.sidebar.radio("📄 Select Page", ["📊 Data View", "🔮 Forecast"])
 
-    division_names = df['division_name'].dropna().unique()
-    selected_division_name = st.sidebar.selectbox("Select Division", sorted(division_names))
-
-    selected_division_code = [k for k, v in division_mapping.items() if v == selected_division_name][0]
-    states = df[df['division'] == selected_division_code]['state'].unique()
-    selected_state = st.sidebar.selectbox("Select State", sorted(states))
+    # Selection in main layout
+    st.subheader("🎯 Select Analysis Scope")
+    col1, col2 = st.columns(2)
+    with col1:
+        division_names = df['division_name'].dropna().unique()
+        selected_division_name = st.selectbox("Select Division", sorted(division_names))
+        selected_division_code = [k for k, v in division_mapping.items() if v == selected_division_name][0]
+    with col2:
+        states = df[df['division'] == selected_division_code]['state'].unique()
+        selected_state = st.selectbox("Select State", sorted(states))
 
     state_df = df[(df['division'] == selected_division_code) & (df['state'] == selected_state)].copy()
     state_df = state_df.sort_values('date')
 
     if page == "📊 Data View":
-        st.subheader("📊 Inflation Data View")
-        min_date = state_df['date'].min()
-        max_date = state_df['date'].max()
-        start_date, end_date = st.sidebar.date_input("Select Date Range", (min_date, max_date), min_value=min_date, max_value=max_date)
+        st.subheader(f"📊 State-Level Inflation Analysis: {selected_state} - {selected_division_name}")
 
-        filtered_df = state_df[(state_df['date'] >= pd.to_datetime(start_date)) & (state_df['date'] <= pd.to_datetime(end_date))]
+        min_date = state_df['date'].min().date()
+        max_date = state_df['date'].max().date()
+        start_date, end_date = st.slider(
+            "Select Date Range",
+            min_value=min_date,
+            max_value=max_date,
+            value=(min_date, max_date),
+            format="YYYY-MM"
+        )
+        start_date = pd.to_datetime(start_date)
+        end_date = pd.to_datetime(end_date)
+
+        filtered_df = state_df[(state_df['date'] >= start_date) & (state_df['date'] <= end_date)]
 
         if not filtered_df.empty:
-            latest_row = filtered_df.iloc[-1]
-            st.write(f"**Date:** {latest_row['date'].strftime('%Y-%m-%d')}")
-            st.write(f"**MoM Inflation:** {latest_row['inflation_mom']:.4f}%")
-            st.write(f"**YoY Inflation:** {latest_row['inflation_yoy']:.4f}%")
+            latest = filtered_df.iloc[-1]
+            delta_mom = latest['inflation_mom'] - filtered_df.iloc[-2]['inflation_mom'] if len(filtered_df) > 1 else 0
+            delta_yoy = latest['inflation_yoy'] - filtered_df.iloc[-13]['inflation_yoy'] if len(filtered_df) > 12 else 0
 
-            st.line_chart(filtered_df.set_index('date')[['inflation_mom']])
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Current MoM Inflation", f"{latest['inflation_mom']:.2f}%", f"{delta_mom:.2f}%")
+            with col2:
+                st.metric("Current YoY Inflation", f"{latest['inflation_yoy']:.2f}%", f"{delta_yoy:.2f}%")
 
-            stats = filtered_df['inflation_mom'].describe().to_frame().T
-            st.subheader("📊 Summary Statistics")
-            st.dataframe(stats.style.format("{:.4f}"))
+            tab1, tab2 = st.tabs(["📈 Trend", "📊 Distribution"])
+            with tab1:
+                fig = px.line(filtered_df, x='date', y=['inflation_mom', 'inflation_yoy'],
+                              labels={'value': 'Inflation %', 'date': ''},
+                              title=f"{selected_state} - {selected_division_name}")
+                st.plotly_chart(fig, use_container_width=True)
+            with tab2:
+                st.plotly_chart(px.histogram(filtered_df, x='inflation_mom', nbins=20,
+                              title="Distribution of Monthly MoM Inflation"), use_container_width=True)
+
+            st.subheader("📋 Summary Statistics")
+            st.dataframe(filtered_df[['inflation_mom']].describe().T.style.format("{:.4f}"))
+
+            st.subheader("📂 Raw Data")
+            st.dataframe(
+                filtered_df[['date', 'inflation_mom', 'inflation_yoy']]
+                .sort_values('date', ascending=False)
+                .style.format({'inflation_mom': '{:.2f}%', 'inflation_yoy': '{:.2f}%'})
+            )
         else:
             st.warning("No data for selected range.")
 
     elif page == "🔮 Forecast":
-        st.subheader("🔮 Forecast - Next 6 Months")
+        st.subheader(f"🔮 Forecast - Next 6 Months: {selected_state} - {selected_division_name}")
 
         if len(state_df) >= 6:
             state_df['t'] = np.arange(len(state_df))
