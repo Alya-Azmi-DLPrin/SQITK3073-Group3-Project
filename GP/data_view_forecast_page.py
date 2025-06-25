@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
-@st.cache_data (ttl=86400)
-
+@st.cache_data(ttl=86400)
 def load_data():
     url = "https://storage.dosm.gov.my/cpi/cpi_2d_state_inflation.csv"
     df = pd.read_csv(url)
@@ -45,7 +44,6 @@ def render_data_view_forecast_page():
 
     page = st.sidebar.radio("📄 Select Page", ["📊 Data View", "🔮 Forecast"])
 
-    # Selection in main layout
     st.subheader("🎯 Select Analysis Scope")
     col1, col2 = st.columns(2)
     with col1:
@@ -83,9 +81,19 @@ def render_data_view_forecast_page():
 
             col1, col2 = st.columns(2)
             with col1:
-                st.metric("Current MoM Inflation", f"{latest['inflation_mom']:.2f}%", f"{delta_mom:.2f}%")
+                st.metric(
+                    "Current MoM Inflation",
+                    f"{latest['inflation_mom']:.2f}%",
+                    f"{delta_mom:.2f}%",
+                    delta_color="inverse"  # 🔴 if up, 🟢 if down
+                )
             with col2:
-                st.metric("Current YoY Inflation", f"{latest['inflation_yoy']:.2f}%", f"{delta_yoy:.2f}%")
+                st.metric(
+                    "Current YoY Inflation",
+                    f"{latest['inflation_yoy']:.2f}%",
+                    f"{delta_yoy:.2f}%",
+                    delta_color="inverse"  # 🔴 if up, 🟢 if down
+                )
 
             tab1, tab2 = st.tabs(["📈 Trend", "📊 Distribution"])
             with tab1:
