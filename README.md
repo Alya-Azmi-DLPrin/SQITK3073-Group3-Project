@@ -1,7 +1,8 @@
-# Malaysia Inflation Intelligence Dashboard
+# Malaysia Inflation Intelligence Dashboard :  A Streamlit-Based Tool for FDI Risk Assessment
 
 ## Course: SQITK3073 Business Analytic Programming
 ## Lecturer: 
+* DR. MOHD AAMIR ADEEB BIN ABDUL RAHIM
 ## Students:
 * Alya Farhana
 * Lim Zhi Yee
