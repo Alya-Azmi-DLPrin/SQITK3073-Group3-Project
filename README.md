@@ -11,13 +11,13 @@ Requirements to start the program:
 
 Run the following commands in your command prompt/terminal
 
-pip install streamlit
-/n pip install matplotlib
-/n pip install plotly
-/n pip install numpy
-pip install pandas
-pip install fpdf
-pip install kaleido
+pip install streamlit  
+pip install matplotlib  
+pip install plotly  
+pip install numpy  
+pip install pandas  
+pip install fpdf  
+pip install kaleido  
 
 If all of the above have been installed, you can unzip the file or open it via WinRAR.
 
