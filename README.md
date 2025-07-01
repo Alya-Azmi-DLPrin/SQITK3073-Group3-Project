@@ -19,6 +19,7 @@
 
 ## Quick start
 ## Clone Repository:
+https://github.com/Alya-Azmi-DLPrin/SQITK3073-Group3-Project/tree/f245460d623ba87b6f73d7f0d4b0ceeab607978f/GP
 
 ## Run the following commands in your command prompt/terminal:
 pip install streamlit  
