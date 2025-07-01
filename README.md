@@ -18,7 +18,7 @@
 - **Real-time Data** : Monthly auto-uppdates from DOSM
 
 ## Requirements to start the program
-# Run the following commands in your command prompt/terminal:
+## Run the following commands in your command prompt/terminal:
 
 pip install streamlit  
 pip install matplotlib  
@@ -33,5 +33,5 @@ If all of the above have been installed, you can unzip the file or open it via W
 After downloading the zip file, unzip it.
 Click on autorun to launch the program.
 
-# Launch dashboard:
+## Launch dashboard:
 streamlit run main.py
