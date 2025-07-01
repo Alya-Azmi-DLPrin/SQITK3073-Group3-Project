@@ -1,4 +1,4 @@
-# Group Assignment under course SQITK3073
+# Group Project under course SQITK3073
 Students:
 
 * Alya Farhana
