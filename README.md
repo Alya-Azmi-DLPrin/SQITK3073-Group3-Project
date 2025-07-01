@@ -1,4 +1,4 @@
-# Malaysia Inflation Intelligence Dashboard :A Streamlit-Based Tool for FDI Risk Assessment
+# Malaysia Inflation Intelligence Dashboard : A Streamlit-Based Tool for FDI Risk Assessment
 
 ## Course: SQITK3073 Business Analytic Programming
 ## Lecturer
@@ -17,9 +17,10 @@
 - **PDF Reports** : One-click export for board presentations
 - **Real-time Data** : Monthly auto-uppdates from DOSM
 
-## Requirements to start the program
-## Run the following commands in your command prompt/terminal:
+## Quick start
+## Clone Repository:
 
+## Run the following commands in your command prompt/terminal:
 pip install streamlit  
 pip install matplotlib  
 pip install plotly  
