@@ -33,6 +33,6 @@ pip install kaleido
 
 If all of the above have been installed, you can unzip the file or open it via WinRAR (for Windows user) or The Unarchiver (for macOS user).
 
-## Lauch dashboard
+## Launch dashboard
 Click on autorun to launch the program or use command streamlit run main.py in terminal.
 
