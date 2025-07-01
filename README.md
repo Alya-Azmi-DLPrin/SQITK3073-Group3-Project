@@ -1,15 +1,23 @@
-# Group Project under course SQITK3073
-Students:
+# Malaysia Inflation Intelligence Dashboard
 
+## Course: SQITK3073 Business Analytic Programming
+## Lecturer: 
+## Students:
 * Alya Farhana
 * Lim Zhi Yee
 * Koo Jing Han
 * Lim Xun Yi
 * Yap Hui Shin
 
-Requirements to start the program:
+## Key Features
+- **Interactive Heatmap** : Compare inflation across 16 states & 13 economic sectors
+- **Stability Scoring** : Algorithm quantifying regional investment risk (0-1 scale)
+- **Core Inflation Toggle** : Filter out volatile food/energy prices
+- **PDF Reports** : One-click export for board presentations
+- **Real-time Data** : Monthly auto-uppdates from DOSM
 
-Run the following commands in your command prompt/terminal
+## Requirements to start the program:
+# Run the following commands in your command prompt/terminal
 
 pip install streamlit  
 pip install matplotlib  
@@ -23,3 +31,6 @@ If all of the above have been installed, you can unzip the file or open it via W
 
 After downloading the zip file, unzip it.
 Click on autorun to launch the program.
+
+# Launch dashboard
+streamlit run main.py
