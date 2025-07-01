@@ -21,7 +21,7 @@ This interactive dashboard transform official Consumer Price Index (CPI) from th
 - **Real-time Data** : Monthly auto-updates from DOSM
 
 ## Clone Repository:
-git clone https://github.com/Alya-Azmi-DLPrin/SQITK3073-Group3-Project/tree/f245460d623ba87b6f73d7f0d4b0ceeab607978f/GP
+git clone https://github.com/Alya-Azmi-DLPrin/SQITK3073-Group3-Project.git
 
 ## Install dependencies:
 pip install streamlit  
